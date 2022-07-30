@@ -1,14 +1,14 @@
 //sum.js
 
-function sum(n){
+function sum(n) {
     //1+2+3+....n
     // return n;
-    let result=0
-    for(let i=0;i<=n;i++){
-       result=result+i;
+    let result = 0
+    for (let i = 0; i <= n; i++) {
+        result = result + i;
     }
     return result;
-    
+
 }
 
 console.log(sum(1));//1
