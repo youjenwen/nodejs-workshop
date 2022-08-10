@@ -10,13 +10,13 @@ let promiseFile = function (fileName) {
         });
     })
 }
-async function asyncFile(){
+async function asyncFile(file){
     try{
-        let result = await promiseFile('test.txt')
+        let result = await promiseFile(file)
         console.log(result);
     }
     catch(err){
         console.log(`發生錯誤${err}`);
     }
 }
-asyncFile();
+asyncFile('test.txt');
