@@ -56,7 +56,7 @@
                     }
                 });
                 xhr.onerror = function (event) {
-                    reject('XHR 同步請求錯誤')
+                    reject('XHR 非同步請求錯誤')
                     // responseDom.innerHTML = `XHR 同步請求錯誤`
                 };
                 xhr.open('GET', 'http://54.71.133.152:3000/')
@@ -66,9 +66,9 @@
                 xhr.send();//執行
             })
             p.then((data) => {
-                responseDom.innerHTML = `同步請求已回覆 ${data}`;
+                responseDom.innerHTML = `非同步請求已回覆 ${data}`;
             }).catch((err) => {
-                responseDom.innerHTML = `同步請求失敗，狀態碼 ${err}`;
+                responseDom.innerHTML = `非同步請求失敗，狀態碼 ${err}`;
             })
 
         });
