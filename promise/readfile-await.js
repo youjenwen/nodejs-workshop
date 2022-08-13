@@ -8,16 +8,17 @@ const fs = require('fs');
 //         resolve(data);
 //     });
 // })
+// async function asyncFile() {
+//     try {
+//         let result = await promiseFile
+//         console.log(result);
+//     }
+//     catch (err) {
+//         console.log(`發生錯誤${err}`);
+//     }
+// }
+// asyncFile();
 
-// (async () => {
-//         try {
-//             let result = await promiseFile
-//             console.log(result);
-//         }
-//         catch (err) {
-//             console.log(`發生錯誤${err}`);
-//         }
-//     })();
 let p = new Promise((resolve, reject) => {
     fs.readFile('test.txt', 'utf8', (err, data) => {
       if (err) {
@@ -29,7 +30,7 @@ let p = new Promise((resolve, reject) => {
     });
   });
 
-
+// IIFE
 (async () => {
     try {
       let data = await p;
@@ -38,13 +39,15 @@ let p = new Promise((resolve, reject) => {
       console.error(e);
     }
   })();
-// async function asyncFile() {
-//     try {
-//         let result = await promiseFile
-//         console.log(result);
-//     }
-//     catch (err) {
-//         console.log(`發生錯誤${err}`);
-//     }
-// }
-// asyncFile();
+
+
+//自己寫了IIFE會錯誤，不知道為什麼????
+// (async () => {
+//         try {
+//             let result = await promiseFile
+//             console.log(result);
+//         }
+//         catch (err) {
+//             console.log(`發生錯誤${err}`);
+//         }
+//     })();

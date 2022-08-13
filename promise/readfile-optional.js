@@ -1,5 +1,7 @@
 // import { readFile } from 'fs/promises';
 const fs = require('fs')
+//(1)const fs = require('fs/promsise')
+//(2)const fs = require('fs').promiese
 
 const controller = new AbortController();
 const { signal } = controller;
