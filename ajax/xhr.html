@@ -38,23 +38,39 @@
         });
 
         var asyncBtn = document.getElementById('asyncBtn');
+
         asyncBtn.addEventListener('click', function () {
             responseDom.innerText = '開始「非」同步請求';
             // TODO: 實作非同步請求
-            var xhr = new XMLHttpRequest();
-            xhr.addEventListener('load', function () {
-                if (xhr.status === 200) {
-                    responseDom.innerHTML = `非同步請求已回覆 ${xhr.responseText}`;
-                } else {
-                    responseDom.innerHTML = `非同步請求失敗，狀態碼 ${xhr.status}`;
-                }
-            });
-            xhr.onerror = function (event) {
-                responseDom.innerHTML = `XHR 非同步請求錯誤`
-            };
-            //xhr.open('','',default:true)非同步
-            xhr.open('GET', 'http://54.71.133.152:3000/', true)
-            xhr.send();
+            var p = new Promise((resolve, reject) => {
+                var xhr = new XMLHttpRequest();
+
+                xhr.addEventListener('load', function () {
+                    // console.log(status)
+                    if (xhr.status === 200) {
+                        resolve(xhr.responseText)
+                        // responseDom.innerHTML = `同步請求已回覆 ${xhr.responseText}`;
+                    } else {
+                        reject(xhr.status)
+                        // responseDom.innerHTML = `同步請求失敗，狀態碼 ${xhr.status}`;
+                    }
+                });
+                xhr.onerror = function (event) {
+                    reject('XHR 同步請求錯誤')
+                    // responseDom.innerHTML = `XHR 同步請求錯誤`
+                };
+                xhr.open('GET', 'http://54.71.133.152:3000/')
+                //因為這裡open true/false更改狀態可以使同步或是非同步
+                //把promise包在外面promise只是一個方式 並不會影響他同步還是非同步
+                //因為同步非同步是由open這裡定義 如果更改為false使用 promise就沒有意義
+                xhr.send();//執行
+            })
+            p.then((data) => {
+                responseDom.innerHTML = `同步請求已回覆 ${data}`;
+            }).catch((err) => {
+                responseDom.innerHTML = `同步請求失敗，狀態碼 ${err}`;
+            })
+
         });
 
         var count = document.getElementById('count');
