@@ -11,10 +11,10 @@ let stockFile = new Promise((resolve, rejects) => {
     });
 });
 
-stockFile
-    .then((data) => {
-        // console.log(data)
-        // return data;
+(async () => {
+    try {
+        let data = await stockFile;
+
         let toDay = moment().format('YYYYMMDD');
         let stockNo = data;
         (async () => {
@@ -31,10 +31,12 @@ stockFile
                 console.error(e);
             }
         })();
+    } catch (e) {
+        console.error(e)
+    }
+})();
 
-    }).catch((e) => {
-        console.log(`錯誤: ${e}`);
-    })
+
 // console.log(moment().format('YYYYMMDD'))
 
 
