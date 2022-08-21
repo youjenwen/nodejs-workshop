@@ -10,11 +10,14 @@
     "type": "git",
     "url": "git+https://github.com/youjenwen/nodejs-workshop.git"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/youjenwen/nodejs-workshop/issues"
   },
-  "homepage": "https://github.com/youjenwen/nodejs-workshop#readme"
+  "homepage": "https://github.com/youjenwen/nodejs-workshop#readme",
+  "devDependencies": {
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1"
+  }
 }
