@@ -30,6 +30,21 @@ app.get('/api/1.0/stocks', async (req, res, next) => {
   // console.log(data);
   res.json(data);
 });
+//stockDetails API
+app.get('/api/1.0/stock/:stockId', async (req, res, next) => {
+  const { stockId } = req.params;
+  // console.log(process.env.DB_NAME);
+  // let result = await pool.execute('SELECT * FROM stocks');
+  // let data = result[0];
+  // console.log(stockId);
+  //要怎麼得到id? 利用params
+  let [data] = await pool.execute(
+    `SELECT * FROM stock_prices WHERE stock_id=${stockId}`
+  );
+
+  console.log(data);
+  res.json(data);
+});
 
 app.use((req, res, next) => {
   console.log('這是第1個');

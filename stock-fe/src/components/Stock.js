@@ -9,7 +9,7 @@ const Stock = () => {
   useEffect(() => {
     let getStock = async () => {
       let response = await axios.get('http://localhost:3001/api/1.0/stocks');
-      console.log(response.data);
+      // console.log(response.data);
       setData(response.data);
     };
     getStock();
@@ -19,11 +19,11 @@ const Stock = () => {
     <div>
       {error && <div>{error}</div>}
       <h2 className="ml-7 mt-6 text-xl text-gray-600">股票代碼</h2>
-      {/* response 的資料利用map拆開 */}
+      {/* response 的資料利用map取得資料 */}
       {data.map((stock) => {
         return (
           <div className="bg-white bg-gray-50 p-6 rounded-lg shadow hover:shadow-lg m-6 cursor-pointer">
-            <Link to={`/stock/1234`}>
+            <Link to={`/stock/${stock.id}`}>
               <h2 className="text-2xl font-bold mb-2 text-gray-800">
                 {stock.id}
               </h2>
