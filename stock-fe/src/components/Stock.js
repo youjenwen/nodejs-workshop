@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../utils/config';
 
 const Stock = () => {
   const [error, setError] = useState(null);
@@ -8,7 +9,7 @@ const Stock = () => {
 
   useEffect(() => {
     let getStock = async () => {
-      let response = await axios.get('http://localhost:3001/api/1.0/stocks');
+      let response = await axios.get(`${API_URL}/stocks`);
       // console.log(response.data);
       setData(response.data);
     };
@@ -22,7 +23,7 @@ const Stock = () => {
       {/* response 的資料利用map取得資料 */}
       {data.map((stock) => {
         return (
-          <div className="bg-white bg-gray-50 p-6 rounded-lg shadow hover:shadow-lg m-6 cursor-pointer">
+          <div key={stock.id} className="bg-white bg-gray-50 p-6 rounded-lg shadow hover:shadow-lg m-6 cursor-pointer">
             <Link to={`/stock/${stock.id}`}>
               <h2 className="text-2xl font-bold mb-2 text-gray-800">
                 {stock.id}

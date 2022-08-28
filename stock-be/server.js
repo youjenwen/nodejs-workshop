@@ -1,60 +1,17 @@
 const express = require('express');
-
 require('dotenv').config();
 //利用express建立web application
 const app = express();
 //從.env讀取
 const port = process.env.SERVER_PORT;
+
 const cors = require('cors');
-app.use(cors());
+app.use(cors()); //這裡也是中間件
 
-const mysql = require('mysql2');
-let pool = mysql
-  .createPool({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-  })
-  .promise();
+const pool = require('./utils/db');
 
-//API
-app.get('/api/1.0/products', async (req, res, next) => {
-  // console.log(process.env.DB_NAME);
-  // let result = await pool.execute('SELECT * FROM stocks');
-  // let data = result[0];
-
-  let [data] = await pool.execute('SELECT * FROM product');
-
-  // console.log(data);
-  res.json(data);
-});
-// app.get('/api/1.0/stocks', async (req, res, next) => {
-//   // console.log(process.env.DB_NAME);
-//   // let result = await pool.execute('SELECT * FROM stocks');
-//   // let data = result[0];
-
-//   let [data] = await pool.execute('SELECT * FROM stocks');
-
-//   // console.log(data);
-//   res.json(data);
-// });
-//stockDetails API
-// app.get('/api/1.0/stock/:stockId', async (req, res, next) => {
-//   const { stockId } = req.params;
-//   // console.log(process.env.DB_NAME);
-//   // let result = await pool.execute('SELECT * FROM stocks');
-//   // let data = result[0];
-//   // console.log(stockId);
-//   //要怎麼得到id? 利用params
-//   let [data] = await pool.execute(
-//     `SELECT * FROM stock_prices WHERE stock_id=${stockId}`
-//   );
-
-//   console.log(data);
-//   res.json(data);
-// });
+let stocksRouter = require('./router/stocks');
+app.use('/api/1.0/stocks', stocksRouter);
 
 app.use((req, res, next) => {
   console.log('這是第1個');
