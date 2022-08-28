@@ -3,12 +3,8 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
-// import queryString from 'query-string';
 
 const StockDetails = () => {
-  // console.log('props', props);
-  // const parsed = queryString.parse(window.location);
-  // console.log('parsed', parsed);
   const { stockId } = useParams(); //不能是陣列接
   // console.log(stockId);
   const [error, setError] = useState(null);
@@ -17,7 +13,7 @@ const StockDetails = () => {
   useEffect(() => {
     let getStock = async () => {
       let response = await axios.get(
-        `http://localhost:3001/api/1.0/stock/${stockId}`
+        `http://localhost:3001/api/1.0/stocks/${stockId}`
       );
       setData(response.data);
       // console.log('useEffect[] after set', response.data);
