@@ -5,8 +5,9 @@ require('dotenv').config();
 const app = express();
 //從.env讀取
 const port = process.env.SERVER_PORT;
+
 const cors = require('cors');
-app.use(cors());
+app.use(cors()); //這裡也是中間件
 
 const mysql = require('mysql2');
 let pool = mysql
@@ -16,6 +17,11 @@ let pool = mysql
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
+
+    // 限制 pool 連線數的上限
+    connectionLimit: 10,
+    //請保持 date 是 string，不要轉成 js 的 date物件
+    dateStrings: true,
   })
   .promise();
 
@@ -30,16 +36,20 @@ app.get('/api/1.0/stocks', async (req, res, next) => {
   // console.log(data);
   res.json(data);
 });
-//stockDetails API
-app.get('/api/1.0/stock/:stockId', async (req, res, next) => {
+//stockDetails API所有股票代碼
+app.get('/api/1.0/stocks/:stockId', async (req, res, next) => {
   const { stockId } = req.params;
   // console.log(process.env.DB_NAME);
-  // let result = await pool.execute('SELECT * FROM stocks');
-  // let data = result[0];
-  // console.log(stockId);
+
   //要怎麼得到id? 利用params
+  //直接貼sql語法會有問題 -> sql injection 如果在網址裡輸入 || 1=1 -- 全部資料都會顯示
+  // let [data] = await pool.execute(
+  //   `SELECT * FROM stock_prices WHERE stock_id=${stockId}`
+  // );
+  //
   let [data] = await pool.execute(
-    `SELECT * FROM stock_prices WHERE stock_id=${stockId}`
+    'SELECT * FROM stock_prices WHERE stock_id=?',
+    [stockId]
   );
 
   console.log(data);
