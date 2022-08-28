@@ -10,16 +10,19 @@ app.use(cors()); //這裡也是中間件
 
 const pool = require('./utils/db');
 
+app.use(express.json());
+
 let stocksRouter = require('./router/stocks');
 app.use('/api/1.0/stocks', stocksRouter);
+
+let authRouter = require('./router/auth');
+app.use(authRouter);
 
 app.use((req, res, next) => {
   console.log('這是第1個');
   next();
 });
-// app.[method]
-// method: get, post, delete, put, patch, ...
-// GET /
+
 app.get('/', (req, res) => {
   res.send('這裡是首頁');
 });
