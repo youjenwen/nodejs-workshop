@@ -2,8 +2,7 @@ import axios from 'axios';
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
-//import moment from 'moment';
+import { API_URL } from '../utils/config';
 
 const StockDetails = () => {
   const { stockId } = useParams(); //不能是陣列接
@@ -16,7 +15,7 @@ const StockDetails = () => {
   useEffect(() => {
     let getStock = async () => {
       let response = await axios.get(
-        `http://localhost:3001/api/1.0/stocks/${stockId}?page=${page}`
+        `${API_URL}/stocks/${stockId}?page=${page}`
       );
       setData(response.data.data);
       // console.log('useEffect[] after set', response.data);
