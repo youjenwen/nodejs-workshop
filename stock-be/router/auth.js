@@ -118,8 +118,8 @@ router.post(
     res.json({ message: 'OK' });
   }
 );
-
-router.post('api/1.0/auth/login', async (req, res, next) => {
+//http://localhost:3002/api/1.0/auth/login
+router.post('/api/1.0/auth/login', async (req, res, next) => {
   console.log('login', req.body);
   //TODO:資料驗證
   //確認email有無註冊過
@@ -128,7 +128,7 @@ router.post('api/1.0/auth/login', async (req, res, next) => {
   ]);
 
   if (members.length === 0) {
-    return res.status(404).json({ message: '帳號或密碼錯誤' });
+    return res.status(401).json({ message: '帳號或密碼錯誤' });
   }
   let member = members[0];
   //有註冊過就比密碼
@@ -137,9 +137,26 @@ router.post('api/1.0/auth/login', async (req, res, next) => {
   if (!compareResult) {
     return res.status(401).json({ message: '帳號或密碼錯誤' });
   }
-  // TODO: 密碼比對成功 -> (1) jwt token (2) session/cookie
-  // TODO: 回覆前端登入成功
-  res.json({});
+
+  /// 密碼比對成功 -> 存在 session
+  let saveMember = {
+    id: member.id,
+    name: member.name,
+    email: member.email,
+    photo: member.photo,
+    loginDt: new Date().toISOString(),
+  };
+  // 把資料寫進 session 裡
+  req.session.member = saveMember;
+
+  // 回覆前端登入成功
+  res.json(saveMember);
+});
+
+//logout
+router.get('/api/1.0/auth/logout', (req, res, next) => {
+  req.session.member = null;
+  res.json({ message: '登出成功' });
 });
 
 module.exports = router;
