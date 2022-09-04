@@ -10,7 +10,7 @@ router.post('/api/1.0/auth/register', async (req, res, next) => {
     req.body.email,
   ]);
   //  檢查 email 有沒有重複
-  //      如果有，回覆 400 跟錯誤訊息
+  //  如果有，回覆 400 跟錯誤訊息
   if (member.length == 0) {
     // 密碼要雜湊 hash
     let hashPassword = await bcrypt.hash(req.body.password, 10);
@@ -25,8 +25,6 @@ router.post('/api/1.0/auth/register', async (req, res, next) => {
   } else {
     return res.status(404).json({ message: '已存在使用者' });
   }
-
-  res.json(req.body);
 });
 
 module.exports = router;
