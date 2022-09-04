@@ -21,6 +21,8 @@ const registerRules = [
     .withMessage('密碼驗證不一致'),
 ];
 
+//TODO:圖片上傳還沒做
+
 router.post('/api/1.0/auth/register', registerRules, async (req, res, next) => {
   console.log('register', req.body);
   //驗證前端資料
@@ -36,23 +38,44 @@ router.post('/api/1.0/auth/register', registerRules, async (req, res, next) => {
     req.body.email,
   ]);
   //  檢查 email 有沒有重複
-  //      如果有，回覆 400 跟錯誤訊息
-  if (member.length == 0) {
-    // 密碼要雜湊 hash
-    let hashPassword = await bcrypt.hash(req.body.password, 10);
-    // 資料存到資料庫
-    let result = await pool.execute(
-      'INSERT INTO members (email,password,name) VALUE (?, ?, ?)',
-      [req.body.email, hashPassword, req.body.name]
-    );
-    console.log('Insert into result', result);
-    // 回覆前端
-    res.json({ message: 'OK' });
-  } else {
+  //  如果有，回覆 400 跟錯誤訊息
+  //判斷2.0
+  if (member.length > 0) {
     return res.status(404).json({ message: '已存在使用者' });
   }
+  // 密碼要雜湊 hash
+  let hashPassword = await bcrypt.hash(req.body.password, 10);
+  // 資料存到資料庫
+  let result = await pool.execute(
+    'INSERT INTO members (email,password,name) VALUE (?, ?, ?)',
+    [req.body.email, hashPassword, req.body.name]
+  );
+  console.log('Insert into result', result);
+  // 回覆前端
+  res.json({ message: 'OK' });
+});
 
-  res.json(req.body);
+router.post('api/1.0/auth/login', async (req, res, next) => {
+  console.log('login', req.body);
+  //TODO:資料驗證
+  //確認email有無註冊過
+  let [members] = await pool.execute('SELECT * FROM members WHERE email = ?', [
+    req.body.email,
+  ]);
+
+  if (members.length === 0) {
+    return res.status(404).json({ message: '帳號或密碼錯誤' });
+  }
+  let member = members[0];
+  //有註冊過就比密碼
+  //使用bcrypt.compare()
+  let compareResult = await bcrypt.compare(req.body.password, member.password);
+  if (!compareResult) {
+    return res.status(401).json({ message: '帳號或密碼錯誤' });
+  }
+  // TODO: 密碼比對成功 -> (1) jwt token (2) session/cookie
+  // TODO: 回覆前端登入成功
+  res.json({});
 });
 
 module.exports = router;
