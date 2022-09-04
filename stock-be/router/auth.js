@@ -21,39 +21,103 @@ const registerRules = [
     .withMessage('密碼驗證不一致'),
 ];
 
-//TODO:圖片上傳還沒做
-
-router.post('/api/1.0/auth/register', registerRules, async (req, res, next) => {
-  console.log('register', req.body);
-  //驗證前端資料
-  const validateResult = validationResult(req);
-  console.log('validateResult ', validateResult);
-
-  if (!validateResult.isEmpty()) {
-    //validateResult 不為空 則有錯誤需回傳給前端
-    return res.status(400).json({ errors: validateResult.array() });
-  }
-
-  let [member] = await pool.execute('SELECT * FROM members WHERE email = ?', [
-    req.body.email,
-  ]);
-  //  檢查 email 有沒有重複
-  //  如果有，回覆 400 跟錯誤訊息
-  //判斷2.0
-  if (member.length > 0) {
-    return res.status(404).json({ message: '已存在使用者' });
-  }
-  // 密碼要雜湊 hash
-  let hashPassword = await bcrypt.hash(req.body.password, 10);
-  // 資料存到資料庫
-  let result = await pool.execute(
-    'INSERT INTO members (email,password,name) VALUE (?, ?, ?)',
-    [req.body.email, hashPassword, req.body.name]
-  );
-  console.log('Insert into result', result);
-  // 回覆前端
-  res.json({ message: 'OK' });
+//--------------------------------------------
+//圖片上傳
+// nodejs 內建的物件
+const path = require('path');
+// 如果是用 FormData 上傳圖片，Content-Type 會是：
+// Content-Type: multipart/form-data;
+// 就要用 multer 相關的套件來處理
+// npm i multer
+const multer = require('multer');
+// 圖面要存在哪裡？
+const storage = multer.diskStorage({
+  // 設定儲存的目的地（檔案夾）
+  // 要先手動建立好檔案夾 /public/uploads
+  destination: function (req, file, cb) {
+    // path.join 避免不同作業系統之間的 / 或 \
+    // __dirname 目前檔案的位置，用 __dirname 就可以不用管是在哪裡執行程式的
+    cb(null, path.join(__dirname, '..', 'public', 'uploads'));
+  },
+  // 圖片名稱
+  filename: function (req, file, cb) {
+    console.log('file', file);
+    // {
+    //   fieldname: 'photo',
+    //   originalname: 'japan04-200.jpg',
+    //   encoding: '7bit',
+    //   mimetype: 'image/jpeg'
+    // }
+    // 原始檔名: file.originalname => test.abc.png
+    const ext = file.originalname.split('.').pop();
+    // or uuid
+    // https://www.npmjs.com/package/uuid
+    cb(null, `member-${Date.now()}.${ext}`);
+  },
 });
+
+const uploader = multer({
+  storage: storage,
+  // 過濾圖片的種類
+  fileFilter: function (req, file, cb) {
+    if (
+      file.mimetype !== 'image/jpeg' &&
+      file.mimetype !== 'image/jpg' &&
+      file.mimetype !== 'image/png'
+    ) {
+      cb(new Error('上傳的檔案型態不接受'), false);
+    } else {
+      cb(null, true);
+    }
+  },
+  // 過濾檔案的大小
+  limits: {
+    // 1k = 1024 => 200k = 200 * 1024
+    fileSize: 200 * 1024,
+  },
+});
+//-------------------------------------------------
+//因為有圖片上傳 uploader.single('photo') 要加上中間件
+router.post(
+  '/api/1.0/auth/register',
+  uploader.single('photo'),
+  registerRules,
+  async (req, res, next) => {
+    console.log('register', req.body);
+    //驗證前端資料
+    const validateResult = validationResult(req);
+    console.log('validateResult ', validateResult);
+
+    if (!validateResult.isEmpty()) {
+      //validateResult 不為空 則有錯誤需回傳給前端
+      return res.status(400).json({ errors: validateResult.array() });
+    }
+
+    let [member] = await pool.execute('SELECT * FROM members WHERE email = ?', [
+      req.body.email,
+    ]);
+    //  檢查 email 有沒有重複
+    //  如果有，回覆 400 跟錯誤訊息
+    //判斷2.0
+    if (member.length > 0) {
+      return res.status(404).json({ message: '已存在使用者' });
+    }
+    // 密碼要雜湊 hash
+    let hashPassword = await bcrypt.hash(req.body.password, 10);
+
+    //圖片檔名
+    let filename = req.file ? '/uploads/' + req.file.filename : '';
+
+    // 資料存到資料庫
+    let result = await pool.execute(
+      'INSERT INTO members (email,password,name,photo) VALUE (?, ?, ?, ?)',
+      [req.body.email, hashPassword, req.body.name, filename]
+    );
+    console.log('Insert into result', result);
+    // 回覆前端
+    res.json({ message: 'OK' });
+  }
+);
 
 router.post('api/1.0/auth/login', async (req, res, next) => {
   console.log('login', req.body);

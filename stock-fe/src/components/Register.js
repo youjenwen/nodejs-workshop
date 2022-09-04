@@ -4,23 +4,37 @@ import { API_URL } from '../utils/config';
 
 const Register = () => {
   const [register, setRegister] = useState({
-    email: '',
-    name: '',
-    password: '',
-    confirmPassword: '',
+    email: 'test@gmail.com',
+    name: 'testtest',
+    password: '12345678',
+    confirmPassword: '12345678',
   });
-
+  //表單輸入寫入狀態
   const getRegister = (e) => {
     let newRegister = { ...register, [e.target.name]: e.target.value };
     setRegister(newRegister);
   };
 
+function handleUpload(e){
+  setRegister({...register, photo: e.target.files[0]})
+}
+
+
   async function handleSubmit(e) {
     //關閉預設行為
     e.preventDefault();
     try {
-      let response = await axios.post(`${API_URL}/auth/register`, register);
-      console.log('response',response);
+      //方法1:沒有圖片上傳
+      // let response = await axios.post(`${API_URL}/auth/register`, register);
+      // 方法2: 要上傳圖片 FormData
+      let formData = new FormData();
+      formData.append('email', register.email);
+      formData.append('name', register.name);
+      formData.append('password', register.password);
+      formData.append('confirmPassword', register.confirmPassword);
+      formData.append('photo', register.photo);
+      let response = await axios.post(`${API_URL}/auth/register`, formData);
+      console.log(response.data);
     } catch (e) {
       console.log('register', e);
     }
@@ -92,6 +106,7 @@ const Register = () => {
           type="file"
           id="photo"
           name="photo"
+          onChange={handleUpload}
         />
       </div>
       <button
