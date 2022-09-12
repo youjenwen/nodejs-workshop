@@ -21,7 +21,8 @@ const registerRules = [
     .withMessage('密碼驗證不一致'),
 ];
 
-//TODO:圖片上傳還沒做(暫時拿老師的)
+//--------------------------------------------
+//圖片上傳
 // nodejs 內建的物件
 const path = require('path');
 // 如果是用 FormData 上傳圖片，Content-Type 會是：
@@ -75,7 +76,8 @@ const uploader = multer({
     fileSize: 200 * 1024,
   },
 });
-
+//-------------------------------------------------
+//因為有圖片上傳 uploader.single('photo') 要加上中間件
 router.post(
   '/api/1.0/auth/register',
   uploader.single('photo'),
@@ -98,22 +100,25 @@ router.post(
     //  如果有，回覆 400 跟錯誤訊息
     //判斷2.0
     if (member.length > 0) {
-      return res.status(404).json({ message: '這個email已經註冊過' });
+      return res.status(404).json({ message: '已存在使用者' });
     }
     // 密碼要雜湊 hash
     let hashPassword = await bcrypt.hash(req.body.password, 10);
+
+    //圖片檔名
+    let filename = req.file ? '/uploads/' + req.file.filename : '';
+
     // 資料存到資料庫
     let result = await pool.execute(
-      'INSERT INTO members (email,password,name) VALUE (?, ?, ?)',
-      [req.body.email, hashPassword, req.body.name]
+      'INSERT INTO members (email,password,name,photo) VALUE (?, ?, ?, ?)',
+      [req.body.email, hashPassword, req.body.name, filename]
     );
     console.log('Insert into result', result);
     // 回覆前端
     res.json({ message: 'OK' });
   }
 );
-
-///////login
+//http://localhost:3002/api/1.0/auth/login
 router.post('/api/1.0/auth/login', async (req, res, next) => {
   console.log('login', req.body);
   //TODO:資料驗證
@@ -123,7 +128,6 @@ router.post('/api/1.0/auth/login', async (req, res, next) => {
   ]);
 
   if (members.length === 0) {
-    //這個email沒有註冊過 所以長度為0 回覆401
     return res.status(401).json({ message: '帳號或密碼錯誤' });
   }
   let member = members[0];
@@ -133,20 +137,26 @@ router.post('/api/1.0/auth/login', async (req, res, next) => {
   if (!compareResult) {
     return res.status(401).json({ message: '帳號或密碼錯誤' });
   }
-  // 密碼比對成功 -> (1) jwt token (2) session/cookie
 
-  // 密碼比對成功 -> 存在 session
+  /// 密碼比對成功 -> 存在 session
   let saveMember = {
     id: member.id,
     name: member.name,
     email: member.email,
     photo: member.photo,
+    loginDt: new Date().toISOString(),
   };
   // 把資料寫進 session 裡
   req.session.member = saveMember;
 
-  //  回覆前端登入成功
-  res.json({});
+  // 回覆前端登入成功
+  res.json(saveMember);
+});
+
+//logout
+router.get('/api/1.0/auth/logout', (req, res, next) => {
+  req.session.member = null;
+  res.json({ message: '登出成功' });
 });
 
 module.exports = router;
